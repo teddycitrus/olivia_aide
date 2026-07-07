@@ -1,0 +1,32 @@
+{
+  "name": "brand-fit-scorer",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "verify:scraper": "node --experimental-strip-types scripts/verify-scraper.ts",
+    "verify:scoring": "node --experimental-strip-types scripts/verify-scoring.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@google/generative-ai": "^0.21.0",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@react-three/drei": "^9.114.0",
+    "@react-three/fiber": "^8.17.10",
+    "chroma-js": "^3.1.2",
+    "node-vibrant": "^3.2.1-alpha.1",
+    "openai": "^4.73.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "replicate": "^1.0.1",
+    "sharp": "^0.33.5",
+    "three": "^0.169.0",
+    "wasp": "file:.wasp/out/sdk/wasp"
+  },
+  "devDependencies": {
+    "@types/chroma-js": "^2.4.5",
+    "@types/react": "^18.2.0",
+    "@types/three": "^0.169.0",
+    "prisma": "5.19.1",
+    "typescript": "^5.6.3"
+  }
+}

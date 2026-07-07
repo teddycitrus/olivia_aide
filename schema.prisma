@@ -1,0 +1,47 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Brand {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now())
+  storeUrl      String
+  domain        String      @unique
+  name          String
+  palette       Json // { swatches: [{ hex, labL, labA, labB, weight }, ...] }
+  photoStyle    String // "studio" | "lifestyle" | "ugc" | "mixed"
+  typography    Json // { family, weight, casing }
+  toneWords     String[] // max 5
+  toneVector    Float[] // 3072-dim embedding
+  sourceAssets  Json // { pdpImages: string[], igImages: string[] }
+  productHeroes Json // [{ url, sku, embedding: Float[] }]
+  candidates    Candidate[]
+}
+
+model Candidate {
+  id        String   @id @default(cuid())
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id])
+  imageUrl  String
+  createdAt DateTime @default(now())
+  scoring   Scoring?
+}
+
+model Scoring {
+  id              String    @id @default(cuid())
+  candidateId     String    @unique
+  candidate       Candidate @relation(fields: [candidateId], references: [id])
+  paletteMatch    Float
+  typographyMatch Float
+  photoStyleMatch Float
+  productAccuracy Float
+  onBrandOverall  Float
+  explanation     String
+  matchedHero     String?
+  createdAt       DateTime  @default(now())
+}

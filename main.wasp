@@ -1,0 +1,67 @@
+app brandFitScorer {
+  wasp: {
+    version: "^0.14.0"
+  },
+  title: "Brand-Fit Scorer",
+  head: [
+    "<meta property='og:title' content='Brand-Fit Scorer for Olivia' />",
+    "<meta property='og:description' content='The missing eval layer for AI-generated ad creative. Score any ad against a brand DNA on 5 axes.' />",
+    "<meta name='viewport' content='width=device-width, initial-scale=1' />"
+  ]
+}
+
+//
+// Pages / routes
+//
+
+route LandingRoute { path: "/", to: LandingPage }
+page LandingPage {
+  component: import { LandingPage } from "@src/pages/Landing"
+}
+
+route BrandDetailRoute { path: "/brands/:id", to: BrandDetailPage }
+page BrandDetailPage {
+  component: import { BrandDetailPage } from "@src/pages/BrandDetail"
+}
+
+//
+// Operations (actions + queries)
+//
+
+action extractBrand {
+  fn: import { extractBrand } from "@src/actions/extractBrand",
+  entities: [Brand]
+}
+
+action scoreCandidate {
+  fn: import { scoreCandidate } from "@src/actions/scoreCandidate",
+  entities: [Brand, Candidate, Scoring]
+}
+
+query getBrand {
+  fn: import { getBrand } from "@src/queries/getBrand",
+  entities: [Brand, Candidate, Scoring]
+}
+
+query listBrands {
+  fn: import { listBrands } from "@src/queries/listBrands",
+  entities: [Brand]
+}
+
+//
+// Custom HTTP APIs (SSE stream + MCP server)
+//
+
+api streamScoring {
+  fn: import { streamScoringHandler } from "@src/api/streamScoring",
+  httpRoute: (GET, "/api/stream-scoring/:brandId"),
+  entities: [Brand, Candidate, Scoring],
+  auth: false
+}
+
+api mcpServer {
+  fn: import { mcpServerHandler } from "@src/api/mcpServer",
+  httpRoute: (POST, "/mcp"),
+  entities: [Brand, Candidate, Scoring],
+  auth: false
+}

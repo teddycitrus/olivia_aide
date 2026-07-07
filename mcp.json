@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "brand-fit-scorer": {
+      "type": "http",
+      "url": "https://brandfit.vercel.app/mcp"
+    },
+    "brand-fit-scorer-local": {
+      "type": "http",
+      "url": "http://localhost:3001/mcp"
+    }
+  }
+}
