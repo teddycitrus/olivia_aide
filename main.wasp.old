@@ -1,10 +1,10 @@
-app BrandFitScorer {
+app Nora {
   wasp: {
     version: "^0.24.0"
   },
-  title: "Brand-Fit Scorer",
+  title: "Nora",
   head: [
-    "<meta property='og:title' content='Brand-Fit Scorer for Olivia' />",
+    "<meta property='og:title' content='Nora for Olivia' />",
     "<meta property='og:description' content='The missing eval layer for AI-generated ad creative. Score any ad against a brand DNA on 5 axes.' />",
     "<meta name='viewport' content='width=device-width, initial-scale=1' />"
   ]

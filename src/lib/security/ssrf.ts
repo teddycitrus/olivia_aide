@@ -79,7 +79,7 @@ export type SafeFetchOptions = { timeoutMs?: number; maxBytes?: number; userAgen
 const DEFAULT_TIMEOUT_MS = 5000
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024
 const MAX_REDIRECTS = 3
-const DEFAULT_UA = 'Mozilla/5.0 (compatible; BrandFitScorer/1.0)'
+const DEFAULT_UA = 'Mozilla/5.0 (compatible; Nora/1.0)'
 
 type Resolved = { statusCode: number; headers: http.IncomingHttpHeaders; body: Buffer }
 

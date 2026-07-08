@@ -1,4 +1,4 @@
-# Brand-Fit Scorer — PRD
+# Nora — PRD
 
 A weekend-buildable tool that extracts a DTC brand's visual identity from their Shopify store and scores any candidate ad/creative image against that identity on 5 axes. Built specifically to impress the Cresva team (`shubham@cresva.ai`) — positioned as the missing eval layer for their Olivia creative agent.
 
@@ -16,7 +16,7 @@ The build is done when:
 2. Given 10 candidate images (4 obviously off-brand, 6 on-brand), the scorer flags the 4 with `onBrandOverall < 0.6` and the 6 with `> 0.75`.
 3. The results view renders as a WebGL mood board — each candidate is a tile in a Three.js scene, colored by pass/fail, draggable, with hover-to-inspect.
 4. Scoring results stream in progressively (SSE) rather than blocking on batch completion.
-5. Exposed as an MCP server (`brand-fit-scorer` tool) that Claude Code can invoke locally.
+5. Exposed as an MCP server (`nora` tool) that Claude Code can invoke locally.
 6. Deploys to Vercel with 3 env vars (Anthropic, Google, OpenAI keys) + DB URL.
 7. README pitches the project directly to Cresva and links a live demo.
 
@@ -106,11 +106,11 @@ model Scoring {
 ## Wasp config (excerpt)
 
 ```wasp
-app brandFitScorer {
+app Nora {
   wasp: { version: "^0.14.0" },
-  title: "Brand-Fit Scorer",
+  title: "Nora",
   head: [
-    "<meta property='og:title' content='Brand-Fit Scorer for Olivia' />"
+    "<meta property='og:title' content='Nora for Olivia' />"
   ]
 }
 

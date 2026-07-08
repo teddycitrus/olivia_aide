@@ -44,7 +44,7 @@ export async function handleMcpRequest(rawBody: unknown, context: McpContext): P
           result: {
             protocolVersion: PROTOCOL_VERSION,
             capabilities: { tools: {} },
-            serverInfo: { name: 'brand-fit-scorer', version: '1.0.0' },
+            serverInfo: { name: 'nora', version: '1.0.0' },
           },
         }
       case 'ping':

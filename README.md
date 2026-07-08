@@ -14,7 +14,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <h3 align="center">Brand-Fit Scorer</h3>
+  <h3 align="center">Nora</h3>
 
   <p align="center">
     the missing eval layer for AI-generated ad creative.
@@ -22,7 +22,7 @@
     <a href="https://github.com/teddycitrus/olivia_aide"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://brand-fit-scorer-olivia-client.fly.dev/">View Live</a>
+    <a href="https://nora-olivia-client.fly.dev/">View Live</a>
     &middot;
     <a href="https://github.com/teddycitrus/olivia_aide/issues/new?labels=bug">Report Bug</a>
     &middot;
@@ -59,7 +59,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Brand-Fit Scorer takes a Shopify store URL and extracts the brand's visual identity: color palette, typography, photo style, and tone. It then scores any candidate ad or creative image against that identity across five explainable axes, so a marketer (or an agent generating creative on their behalf) can tell if an image is on-brand without eyeballing it.
+Nora takes a Shopify store URL and extracts the brand's visual identity: color palette, typography, photo style, and tone. It then scores any candidate ad or creative image against that identity across five explainable axes, so a marketer (or an agent generating creative on their behalf) can tell if an image is on-brand without eyeballing it.
 
 Key capabilities:
 
@@ -187,7 +187,7 @@ The scorer is exposed as an MCP server (Streamable HTTP, JSON-RPC 2.0) at `POST 
 
 Endpoints:
 - Local: `http://localhost:3001/mcp`
-- Live: `https://brand-fit-scorer-olivia-server.fly.dev/mcp`
+- Live: `https://nora-olivia-server.fly.dev/mcp`
 
 ### Auth
 
@@ -224,7 +224,7 @@ Standard MCP over JSON-RPC 2.0 (protocol version `2024-11-05`):
 ### Example request
 
 ```sh
-curl -s -X POST https://brand-fit-scorer-olivia-server.fly.dev/mcp \
+curl -s -X POST https://nora-olivia-server.fly.dev/mcp \
   -H "Content-Type: application/json" \
   -H "X-MCP-Secret: <your secret>" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_brands","arguments":{}}}'

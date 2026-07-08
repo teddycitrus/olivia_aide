@@ -1,13 +1,13 @@
 {
   "mcpServers": {
-    "brand-fit-scorer": {
+    "nora": {
       "type": "http",
       "url": "https://brandfit.vercel.app/mcp",
       "headers": {
         "X-MCP-Secret": "<set this to that deployment's own MCP_SHARED_SECRET — do not reuse the local one>"
       }
     },
-    "brand-fit-scorer-local": {
+    "nora-local": {
       "type": "http",
       "url": "http://localhost:3001/mcp",
       "headers": {
