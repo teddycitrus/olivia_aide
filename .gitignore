@@ -1,8 +1,8 @@
 .wasp/
 node_modules/
 .env.server
-.env.client
 .DS_Store
 dist/
 *.log
 scripts/.cache/
+PRD.md

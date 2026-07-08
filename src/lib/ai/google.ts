@@ -1,4 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { withBudget, BudgetExhaustedError } from '../security/spendCap'
+
+const PHOTO_STYLE_COST_USD = 0.002
+const TYPOGRAPHY_COST_USD = 0.001
 
 // Gemini 2.5 Flash — cheap/fast vision, strong enough for 4-way photo-style
 // classification and structured typography extraction (see README routing table).
@@ -49,13 +53,16 @@ function inlineImage(dataUrl: string) {
 /** Classify one or more images into a single photo style (majority intent). */
 export async function classifyPhotoStyle(imageDataUrls: string[]): Promise<PhotoStyle> {
   try {
-    const model = client().getGenerativeModel({ model: GEMINI_MODEL })
-    const parts = [{ text: photoStylePrompt }, ...imageDataUrls.slice(0, 6).map(inlineImage)]
-    const res = await withTimeout(model.generateContent(parts), 10_000)
-    const word = res.response.text().trim().toLowerCase().replace(/[^a-z]/g, '')
-    if (word === 'studio' || word === 'lifestyle' || word === 'ugc' || word === 'mixed') return word
-    return 'mixed'
+    return await withBudget('google', PHOTO_STYLE_COST_USD, async () => {
+      const model = client().getGenerativeModel({ model: GEMINI_MODEL })
+      const parts = [{ text: photoStylePrompt }, ...imageDataUrls.slice(0, 6).map(inlineImage)]
+      const res = await withTimeout(model.generateContent(parts), 10_000)
+      const word = res.response.text().trim().toLowerCase().replace(/[^a-z]/g, '')
+      if (word === 'studio' || word === 'lifestyle' || word === 'ugc' || word === 'mixed') return word
+      return 'mixed'
+    })
   } catch (err) {
+    if (err instanceof BudgetExhaustedError) throw err
     console.error('[gemini] classifyPhotoStyle failed, defaulting to mixed:', err)
     return 'mixed'
   }
@@ -65,12 +72,15 @@ export async function classifyPhotoStyle(imageDataUrls: string[]): Promise<Photo
 export async function extractTypography(imageDataUrl: string): Promise<Typography> {
   const neutral: Typography = { family: null, weight: null, casing: null }
   try {
-    const model = client().getGenerativeModel({ model: GEMINI_MODEL })
-    const res = await withTimeout(model.generateContent([{ text: typographyExtractionPrompt }, inlineImage(imageDataUrl)]), 10_000)
-    const text = res.response.text()
-    const match = text.match(/\{[\s\S]*\}/)
-    return match ? (JSON.parse(match[0]) as Typography) : neutral
+    return await withBudget('google', TYPOGRAPHY_COST_USD, async () => {
+      const model = client().getGenerativeModel({ model: GEMINI_MODEL })
+      const res = await withTimeout(model.generateContent([{ text: typographyExtractionPrompt }, inlineImage(imageDataUrl)]), 10_000)
+      const text = res.response.text()
+      const match = text.match(/\{[\s\S]*\}/)
+      return match ? (JSON.parse(match[0]) as Typography) : neutral
+    })
   } catch (err) {
+    if (err instanceof BudgetExhaustedError) throw err
     console.error('[gemini] extractTypography failed, using neutral:', err)
     return neutral
   }

@@ -2,11 +2,17 @@
   "mcpServers": {
     "brand-fit-scorer": {
       "type": "http",
-      "url": "https://brandfit.vercel.app/mcp"
+      "url": "https://brandfit.vercel.app/mcp",
+      "headers": {
+        "X-MCP-Secret": "<set this to that deployment's own MCP_SHARED_SECRET — do not reuse the local one>"
+      }
     },
     "brand-fit-scorer-local": {
       "type": "http",
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3001/mcp",
+      "headers": {
+        "X-MCP-Secret": "<copy the MCP_SHARED_SECRET value from your local .env.server — never commit the real value here>"
+      }
     }
   }
 }

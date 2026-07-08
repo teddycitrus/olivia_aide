@@ -45,3 +45,39 @@ model Scoring {
   matchedHero     String?
   createdAt       DateTime  @default(now())
 }
+
+// --- Security / abuse-control tables ---
+
+// One row per priced LLM call. Daily spend caps are computed by summing
+// usdCost for a provider since the start of the current UTC day.
+model ApiUsage {
+  id        String   @id @default(cuid())
+  provider  String // "anthropic" | "openai" | "google" | "replicate"
+  usdCost   Float
+  createdAt DateTime @default(now())
+
+  @@index([provider, createdAt])
+}
+
+// One row per request that counts against a rate limit. A bucket is checked
+// by counting rows newer than (now - windowMs); never held in memory so
+// limits survive process restarts.
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  bucket    String // e.g. "extract-brand:ip:<hash>" or "global:score-candidate"
+  createdAt DateTime @default(now())
+
+  @@index([bucket, createdAt])
+}
+
+// Suspicious or blocked events for later review: prompt-injection attempts,
+// SSRF blocks, MCP auth failures, budget exhaustion.
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  type      String
+  detail    String
+  ipHash    String?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+}

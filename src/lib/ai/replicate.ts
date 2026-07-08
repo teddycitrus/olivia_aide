@@ -1,4 +1,7 @@
 import Replicate from 'replicate'
+import { withBudget, BudgetExhaustedError } from '../security/spendCap'
+
+const CLIP_EMBED_COST_USD = 0.001
 
 // CLIP ViT-L/14 via Replicate — standard, cheap, fast image-similarity embeddings
 // for multi-hero product-accuracy matching. Pin a known CLIP embedding model.
@@ -14,19 +17,22 @@ function client(): Replicate {
 /** CLIP-embed a single image (data URL or public URL). Returns [] on failure. */
 export async function clipEmbed(imageUrl: string): Promise<number[]> {
   try {
-    const out = (await withTimeout(
-      client().run(CLIP_MODEL, { input: { inputs: imageUrl } }) as Promise<unknown>,
-      15_000,
-    )) as Array<{ embedding: number[] }> | { embedding: number[] } | number[]
+    return await withBudget('replicate', CLIP_EMBED_COST_USD, async () => {
+      const out = (await withTimeout(
+        client().run(CLIP_MODEL, { input: { inputs: imageUrl } }) as Promise<unknown>,
+        15_000,
+      )) as Array<{ embedding: number[] }> | { embedding: number[] } | number[]
 
-    // The model returns [{ input, embedding }]; normalize the common shapes.
-    if (Array.isArray(out) && out.length && typeof out[0] === 'object' && 'embedding' in (out[0] as object)) {
-      return (out[0] as { embedding: number[] }).embedding
-    }
-    if (!Array.isArray(out) && out && 'embedding' in out) return (out as { embedding: number[] }).embedding
-    if (Array.isArray(out) && typeof out[0] === 'number') return out as number[]
-    return []
+      // The model returns [{ input, embedding }]; normalize the common shapes.
+      if (Array.isArray(out) && out.length && typeof out[0] === 'object' && 'embedding' in (out[0] as object)) {
+        return (out[0] as { embedding: number[] }).embedding
+      }
+      if (!Array.isArray(out) && out && 'embedding' in out) return (out as { embedding: number[] }).embedding
+      if (Array.isArray(out) && typeof out[0] === 'number') return out as number[]
+      return []
+    })
   } catch (err) {
+    if (err instanceof BudgetExhaustedError) throw err
     console.error('[replicate] clipEmbed failed:', err)
     return []
   }
