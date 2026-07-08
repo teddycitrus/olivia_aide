@@ -240,7 +240,7 @@ curl -s -X POST https://nora-olivia-server.fly.dev/mcp \
 - [x] Multi-hero CLIP matching with vision-model refinement for product accuracy
 - [x] Per-provider daily spend caps and rate limiting
 - [ ] SSE-streamed progressive scoring in the UI
-- [ ] MCP server exposed as a callable tool for external agents
+- [x] MCP server exposed as a callable tool for external agents
 - [ ] WebGL mood board view for candidate results
 - [ ] Historical ad performance data, as a separate "winner-learning loop" project
 
