@@ -1,5 +1,6 @@
 .wasp/
 node_modules/
+.claude/
 .env.server
 .DS_Store
 dist/
