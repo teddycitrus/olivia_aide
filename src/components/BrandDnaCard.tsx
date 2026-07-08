@@ -35,6 +35,11 @@ export function BrandDnaCard({ brand, onRegenerate, regenerating }: { brand: Bra
       <div>
         <h2 className="text-lg font-semibold">{brand.name}</h2>
         <p className="text-xs text-white/40">{brand.domain}</p>
+        <p className="mt-3 text-xs leading-relaxed text-white/50">
+          <span className="font-semibold text-white/70">Brand DNA</span> is the visual fingerprint pulled from this
+          store: its color palette, typography, photo style, and tone. Every candidate image you score on the right
+          gets compared against these traits.
+        </p>
       </div>
 
       <section>

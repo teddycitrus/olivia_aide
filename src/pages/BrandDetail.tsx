@@ -72,6 +72,22 @@ export function BrandDetailPage() {
       </aside>
 
       <main className="relative flex w-full flex-col lg:w-[65%]">
+        <div className="border-b border-white/10 bg-black/30 px-5 py-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-white/70">Creative Mood Board</h2>
+          <p className="mt-1 text-xs text-white/40">
+            Each tile is a candidate you uploaded. Its position on the palette / photo style / product accuracy axes
+            shows how well it matches the brand on that trait, further from center is a bigger mismatch. Drag to
+            rotate, scroll to zoom, click a tile for the full breakdown.
+          </p>
+          <div className="mt-2 flex gap-4 text-xs text-white/50">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-pass" /> at or above threshold
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-fail" /> below threshold
+            </span>
+          </div>
+        </div>
         <div className="relative min-h-[420px] flex-1">
           <ResultsCanvas candidates={scored} threshold={threshold} showOnlyPassing={showOnlyPassing} onSelect={setSelected} />
           {scored.length === 0 && (
