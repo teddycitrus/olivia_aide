@@ -46,6 +46,51 @@ model Scoring {
   createdAt       DateTime  @default(now())
 }
 
+// --- Auth ---
+
+// Wasp-managed business-logic user. Auth/Identity/Session tables are added
+// automatically by Wasp's compiler once `auth` is configured in main.wasp.ts;
+// this model only needs to exist as the thing they attach to.
+model User {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  // Mirrors the underlying email-identity's verification flag, set by the
+  // onAfterEmailVerified hook (src/auth/hooks.ts). Kept as a plain column
+  // here so verifyMcpSecret can check it with a single findUnique on User —
+  // MCP requests carry no Wasp session, so there is no `context.user` to read
+  // `identities.email.isEmailVerified` off of; this avoids reaching into
+  // Wasp's internal Auth/AuthIdentity tables from an unrelated request.
+  emailVerified Boolean  @default(false)
+  apiKeys   McpApiKey[]
+}
+
+enum McpApiKeyTier {
+  DEFAULT
+  PRO
+  ADMIN
+}
+
+// Per-caller MCP credential. Only keyHash (argon2id) is ever persisted; the
+// plaintext key is returned to the owner exactly once, at creation time, and
+// never stored or logged anywhere. keyPrefix is the first 8 chars of the
+// plaintext key, kept only so the dashboard can show "nora_ab12cd34..." for
+// the user to tell their keys apart — it is not sensitive on its own (32
+// bytes of entropy remain unknown) and is never used for auth.
+model McpApiKey {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyHash    String        @unique
+  keyPrefix  String
+  name       String?
+  tier       McpApiKeyTier @default(DEFAULT)
+  createdAt  DateTime      @default(now())
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+
+  @@index([userId])
+}
+
 // --- Security / abuse-control tables ---
 
 // One row per priced LLM call. Daily spend caps are computed by summing
