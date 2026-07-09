@@ -16,10 +16,12 @@ type RouteRule = {
   concurrencyMax?: number
 }
 
-// Keyed by path WITHOUT the "/operations" prefix: this middleware is mounted
-// as `router.use("/operations", middleware, router$2)` by Wasp's generated
-// server, so Express strips the mount prefix and `req.path` here is already
-// relative (e.g. "/extract-brand", not "/operations/extract-brand").
+// Keyed by path WITHOUT the mount prefix: this same global middleware is
+// mounted at both `router.use("/operations", middleware, router$2)` and
+// `router.use("/auth", middleware, auth)` by Wasp's generated server, so
+// Express strips whichever prefix applies and `req.path` here is already
+// relative (e.g. "/extract-brand" under /operations, "/email/login" under
+// /auth — Wasp's email auth provider is mounted at /auth/email/*).
 const RULES: Record<string, RouteRule> = {
   '/extract-brand': {
     endpoint: 'extract-brand',
@@ -31,6 +33,11 @@ const RULES: Record<string, RouteRule> = {
     concurrencyKey: 'scoring',
     concurrencyMax: 3,
   },
+  '/email/login': { endpoint: 'auth-login', perIp: LIMITS.authLoginPerIp },
+  '/email/signup': { endpoint: 'auth-signup', perIp: LIMITS.authSignupPerIp },
+  '/email/request-password-reset': { endpoint: 'auth-request-password-reset', perIp: LIMITS.authRequestPasswordResetPerIp },
+  '/email/reset-password': { endpoint: 'auth-reset-password', perIp: LIMITS.authResetPasswordPerIp },
+  '/email/verify-email': { endpoint: 'auth-verify-email', perIp: LIMITS.authVerifyEmailPerIp },
 }
 
 export const rateLimitMiddleware: RequestHandler = (req, res, next) => {

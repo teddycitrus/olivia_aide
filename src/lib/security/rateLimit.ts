@@ -19,9 +19,34 @@ export const LIMITS = {
   scoreCandidatePerIp: { limit: 30, windowMs: HOUR_MS },
   batchScorePerIp: { limit: 3, windowMs: HOUR_MS },
   batchScoreMaxCandidates: 15,
+  // Coarse, pre-auth guard: bounds how many argon2id verify attempts (~120ms
+  // of CPU each) any single IP can force regardless of whether the secret
+  // turns out to be valid. The REAL per-caller quota is MCP_TIER_LIMITS
+  // below, applied only after a request authenticates.
   mcpPerIp: { limit: 100, windowMs: HOUR_MS },
   globalPerEndpoint: { limit: 20, windowMs: MINUTE_MS },
+  // Wasp's built-in email-auth endpoints (login/signup/request-password-reset/
+  // reset-password/verify-email) — a public signup surface needs its own
+  // abuse controls: login guards against credential stuffing, signup against
+  // mass account creation, request-password-reset against email-bombing an
+  // arbitrary victim address (it sends mail regardless of who's asking).
+  authLoginPerIp: { limit: 10, windowMs: HOUR_MS },
+  authSignupPerIp: { limit: 5, windowMs: HOUR_MS },
+  authRequestPasswordResetPerIp: { limit: 5, windowMs: HOUR_MS },
+  authResetPasswordPerIp: { limit: 10, windowMs: HOUR_MS },
+  authVerifyEmailPerIp: { limit: 10, windowMs: HOUR_MS },
 } as const
+
+// Per-account MCP quota, keyed by (userId, hour) rather than IP once a
+// request has authenticated. Every new signup starts at DEFAULT; ADMIN is
+// reserved for the grandfathered shared-secret migration (see
+// scripts/migrate-mcp-shared-secret.ts) and any account an operator bumps by
+// hand. There is no self-service upgrade path.
+export const MCP_TIER_LIMITS: Record<'DEFAULT' | 'PRO' | 'ADMIN', { limit: number; windowMs: number }> = {
+  DEFAULT: { limit: 100, windowMs: HOUR_MS },
+  PRO: { limit: 1000, windowMs: HOUR_MS },
+  ADMIN: { limit: 10000, windowMs: HOUR_MS },
+}
 
 /**
  * Sliding-window rate limit backed by Postgres — deliberately never

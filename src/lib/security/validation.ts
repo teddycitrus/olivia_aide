@@ -41,6 +41,16 @@ export const brandIdSchema = z.string().trim().min(1).max(64)
 export const extractBrandArgsSchema = z.object({ storeUrl: storeUrlSchema })
 export const scoreCandidateArgsSchema = z.object({ brandId: brandIdSchema, imageUrl: imageUrlSchema })
 
+export const apiKeyNameSchema = z
+  .string()
+  .trim()
+  .max(60, 'name is too long')
+  .transform(sanitizeString)
+  .optional()
+  .or(z.literal('').transform(() => undefined))
+export const createApiKeyArgsSchema = z.object({ name: apiKeyNameSchema })
+export const revokeApiKeyArgsSchema = z.object({ keyId: z.string().trim().min(1).max(64) })
+
 /** Parses `args` with `schema`, throwing a clean 400 HttpError (never a raw ZodError) on failure. */
 export function parseOrThrow<T>(schema: z.ZodType<T>, args: unknown): T {
   const result = schema.safeParse(args)
