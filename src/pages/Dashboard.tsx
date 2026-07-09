@@ -73,7 +73,7 @@ export function DashboardPage() {
               <div key={key.id} className="flex items-center justify-between border-2 border-black bg-white p-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-bold">{key.displayPrefix}…</span>
+                    <span className="font-mono text-sm font-bold">{key.keyFingerprint ? `fp:${key.keyFingerprint}` : 'legacy key'}</span>
                     <span className="border border-black bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
                       {key.tier}
                     </span>

@@ -38,13 +38,8 @@ export default app({
     "<meta property='og:description' content='The missing eval layer for AI-generated ad creative. Score any ad against a brand DNA on 5 axes.' />",
     "<meta name='viewport' content='width=device-width, initial-scale=1' />",
   ],
-  // TODO(prod): "Dummy" only logs emails to the console — fine for local
-  // dev/testing, not allowed in production. Before deploying this, decide
-  // an SMTP/SendGrid/Mailgun provider (e.g. Resend/Postmark via SMTP) and
-  // set the matching *_API_KEY / SMTP_* env vars — this is a real decision
-  // for John, not something to silently pick.
   emailSender: {
-    provider: "Dummy",
+    provider: "SMTP",
   },
   auth: {
     userEntity: "User",

@@ -23,12 +23,12 @@ export function CandidateUploader({ onAdd, disabled }: { onAdd: (urls: string[])
         onChange={(e) => setText(e.target.value)}
         placeholder="Paste candidate image URLs, one per line"
         rows={3}
-        className="w-full resize-none rounded-lg border border-white/10 bg-black/30 p-3 text-sm outline-none placeholder:text-white/30 focus:border-accent/60"
+        className="w-full resize-none border-2 border-black bg-white p-3 text-sm font-medium outline-none placeholder:text-foreground/40 focus:border-primary-blue"
       />
       <button
         onClick={submit}
         disabled={disabled}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black hover:bg-accent/90 disabled:opacity-50"
+        className="border-2 border-black bg-primary-blue px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-hard transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
       >
         Score candidates
       </button>

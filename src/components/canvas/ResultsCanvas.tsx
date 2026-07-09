@@ -28,7 +28,7 @@ export function ResultsCanvas({
 }) {
   return (
     <Canvas camera={{ position: [4.5, 3, 6], fov: 45 }} dpr={[1, 2]} className="h-full w-full">
-      <color attach="background" args={['#0b0b0f']} />
+      <color attach="background" args={['#121212']} />
       <ambientLight intensity={0.8} />
       <Suspense fallback={null}>
         {candidates.map((c) => (
@@ -42,7 +42,7 @@ export function ResultsCanvas({
         ))}
         <AxisLegend />
       </Suspense>
-      <gridHelper args={[10, 10, '#1c1c28', '#14141c']} position={[0, -2.8, 0]} />
+      <gridHelper args={[10, 10, '#F0C020', '#3a3a3a']} position={[0, -2.8, 0]} />
       <OrbitControls enablePan enableZoom enableRotate makeDefault />
     </Canvas>
   )

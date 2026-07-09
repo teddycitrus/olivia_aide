@@ -49,6 +49,7 @@
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#mcp-server">MCP Server</a></li>
+    <li><a href="#deployment">Deployment</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -73,6 +74,8 @@ Key capabilities:
 - candidate scores stream in as they finish instead of waiting on the full batch
 **MCP server**
 - the scorer is exposed as an MCP tool, so agents (including Olivia) can call it directly instead of going through the UI
+**Self-service API keys**
+- developers can sign up with Wasp email/password auth, verify email, create an MCP API key from `/dashboard`, and revoke it without backend access
 **Spend-capped AI calls**
 - every LLM and embedding call is metered against a per-provider daily USD cap, so a runaway batch fails closed instead of running up a bill
 
@@ -87,7 +90,7 @@ Key capabilities:
 | backend | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) |
 | AI / vision | ![Anthropic](https://img.shields.io/badge/Claude-D97757?style=flat-square) ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=googlegemini&logoColor=white) ![Replicate](https://img.shields.io/badge/Replicate-000000?style=flat-square) |
 | language | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) |
-| deployment | ![Fly.io](https://img.shields.io/badge/Fly.io-8B5CF6?style=flat-square&logo=flydotio&logoColor=white) |
+| deployment | ![Fly.io](https://img.shields.io/badge/Fly.io-8B5CF6?style=flat-square&logo=flydotio&logoColor=white) ![Neon](https://img.shields.io/badge/Neon-00E599?style=flat-square) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -98,11 +101,22 @@ Key capabilities:
 
 * Node.js 18+
 * [Wasp CLI](https://wasp.sh) 0.24.x
-* A local Postgres instance (native, not Dockerized)
+* A reachable Postgres instance (Docker locally, or managed/serverless Postgres in production)
 * API keys for Anthropic, OpenAI, Google Generative AI, and Replicate
 
 ```sh
 npm i -g @wasp.sh/wasp-cli@0.24.0
+```
+
+For a local Docker database that matches the default examples:
+
+```sh
+docker run --name nora-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=olivia_aide \
+  -p 5432:5432 \
+  -d postgres:16
 ```
 
 ### Installation
@@ -129,17 +143,15 @@ npm i -g @wasp.sh/wasp-cli@0.24.0
    GOOGLE_GENERATIVE_AI_API_KEY=...
    REPLICATE_API_TOKEN=r8_...
    DATABASE_URL=postgresql://user:pass@localhost:5432/olivia_aide
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_USERNAME=...
+   SMTP_PASSWORD=...
 
    ANTHROPIC_DAILY_USD_CAP=0.25
    OPENAI_DAILY_USD_CAP=0.25
    GOOGLE_DAILY_USD_CAP=0.25
    REPLICATE_DAILY_USD_CAP=0.25
-   MCP_SHARED_SECRET=
-   ```
-
-   Generate `MCP_SHARED_SECRET` with:
-   ```sh
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
 
 4. Run the database migrations
@@ -193,14 +205,22 @@ Endpoints:
 
 Every request needs an `X-MCP-Secret` header matching one of your own per-account API keys — there is no shared/global secret anymore. To get one:
 
-1. Sign up at `/signup` and verify your email (link is emailed via whatever `emailSender` provider is configured — `Dummy` in local dev, which just logs the link to the server console).
+1. Sign up at `/signup` and verify your email (link is emailed through the configured Wasp SMTP sender).
 2. Log in and open `/dashboard`.
-3. Click **+ New key**. The plaintext key is shown exactly once — copy it immediately. Only an argon2id hash is ever stored; if you lose the plaintext, revoke the key and create a new one.
+3. Click **+ New key**. The plaintext key is shown exactly once — copy it immediately. Only one-way argon2id hashes are ever stored; if you lose the plaintext, revoke the key and create a new one.
 4. Revoke a key any time from the same dashboard. Revocation is immediate — the next request with that key gets `401`, and no other account's keys are affected.
 
-Missing, unknown, wrong, or revoked keys all fail closed with the same `401` and the same response timing (a fixed argon2id verify cost plus random jitter is paid on every rejection path, so none of those cases are distinguishable from the outside). Requests are also rate-limited: a coarse 100/hour-per-IP guard applies before auth even runs (so a key-guessing flood trips it regardless of whether any attempt would've succeeded), and every authenticated request additionally counts against your account's own tier quota (`DEFAULT` 100/hour, `PRO` 1000/hour, `ADMIN` 10000/hour) — keyed by account, not IP, so one caller can't be throttled by another's traffic. New signups start at `DEFAULT`; there's no self-service upgrade path, an operator has to bump a `McpApiKey.tier` by hand.
+Missing, unknown, wrong, or revoked keys all fail closed with the same `401` and the same response timing (a fixed argon2id verify cost plus random jitter is paid on every rejection path, so none of those cases are distinguishable from the outside). Requests are also rate-limited: a coarse 100/hour-per-IP guard applies before auth even runs (so a key-guessing flood trips it regardless of whether any attempt would've succeeded), and every authenticated request additionally counts against your account's own tier quota (`DEFAULT` 100/hour, `PRO` 1000/hour, `ADMIN` 10000/hour) — keyed by account, not IP, so one caller can't be throttled by another's traffic. New signups start at `DEFAULT`; there's no self-service upgrade path, an operator has to bump a user's `User.mcpTier` by hand.
 
-**Migration note:** this replaced a single shared `MCP_SHARED_SECRET` env var used by every caller. Rather than invalidate it and require every existing integration (most importantly Olivia's) to coordinate a cutover, `npm run migrate:mcp-secret` grandfathers the existing secret value into one `ADMIN`-tier `McpApiKey` row (owned by a bare service-account `User`, not a real login) — so it keeps authenticating unchanged. `MCP_SHARED_SECRET` itself is no longer read anywhere; it's safe to remove from env once you've confirmed the migration worked.
+**Migration note:** this replaced a single shared `MCP_SHARED_SECRET` env var used by every caller. Rather than invalidate it and require every existing integration (most importantly Olivia's) to coordinate a cutover, `npm run migrate:mcp-secret` grandfathers the existing secret value into one `ADMIN`-tier `McpApiKey` row owned by an `ADMIN`-tier bare service-account `User` with no login identity — so it keeps authenticating unchanged. `MCP_SHARED_SECRET` is only read by that one migration script, never by request-time auth; remove it from env once the migration reports success.
+
+To verify the DB-backed lifecycle against a real Postgres database, run:
+
+```sh
+npm run verify:mcp-auth
+```
+
+That verifier creates disposable users and keys, confirms the DB stores only hashes/fingerprints, checks valid/missing/unknown/unverified/revoked auth outcomes, and confirms revoking one user's key does not affect another user's key.
 
 ### Supported methods
 
@@ -234,6 +254,19 @@ curl -s -X POST https://nora-olivia-server.fly.dev/mcp \
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- DEPLOYMENT -->
+## Deployment
+
+The planned production shape is serverless-managed data plus scale-to-zero compute:
+
+- Postgres runs on a managed/serverless provider such as Neon. Set `DATABASE_URL` to the provider's pooled, TLS-enabled connection string, for example `postgresql://...?...sslmode=require`.
+- The Wasp client is static and can be hosted on any static/CDN host, including Fly, Netlify, Cloudflare Pages, or Vercel.
+- The Wasp server is a generated Node/Express app, not a bundle of per-route serverless functions. In this repo it runs on Fly Machines with `auto_stop_machines = 'stop'`, `auto_start_machines = true`, and `min_machines_running = 0`, so it scales to zero when idle while preserving the normal Wasp deployment path.
+- MCP auth, key revocation, spend caps, and rate limits are database-backed and survive cold starts. The scoring concurrency guard is process-local by design, so it limits concurrent work per running server instance rather than globally across every possible instance.
+- A pure function-as-a-service deployment would require refactoring the Wasp server APIs, MCP endpoint, auth sessions, migrations, and SSE streaming path out of the generated Wasp server. That is a deliberate platform migration, not part of the MCP auth change.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- ROADMAP -->
 ## Roadmap
 
@@ -241,8 +274,13 @@ curl -s -X POST https://nora-olivia-server.fly.dev/mcp \
 - [x] Five-axis candidate scoring with plain-language explanations
 - [x] Multi-hero CLIP matching with vision-model refinement for product accuracy
 - [x] Per-provider daily spend caps and rate limiting
+- [x] Wasp email/password signup, verification, login, dashboard sessions, and password reset
+- [x] Per-account MCP API keys with one-time plaintext display, argon2id hashing, dashboard listing, and revocation
+- [x] Account-tier MCP rate limits loaded during key verification
 - [ ] SSE-streamed progressive scoring in the UI
 - [x] MCP server exposed as a callable tool for external agents
+- [ ] Move production Postgres to Neon or equivalent serverless Postgres
+- [ ] Deploy Wasp server on scale-to-zero compute with static client hosting
 - [ ] WebGL mood board view for candidate results
 - [ ] Historical ad performance data, as a separate "winner-learning loop" project
 

@@ -11,7 +11,7 @@
 //
 // Run: node --experimental-strip-types --env-file=.env.server scripts/migrate-mcp-shared-secret.ts
 import { PrismaClient } from '@prisma/client'
-import { hashApiKeyForStorage, lookupPrefixOf } from '../src/lib/security/mcpAuth.ts'
+import { hashApiKeyForStorage, lookupHashForStorage, keyFingerprintOfLookupHash } from '../src/lib/security/mcpAuth.ts'
 
 const MIGRATION_KEY_NAME = 'grandfathered-shared-secret'
 
@@ -26,20 +26,25 @@ async function main() {
   try {
     const existing = await prisma.mcpApiKey.findFirst({ where: { name: MIGRATION_KEY_NAME } })
     if (existing) {
-      console.log(`Already migrated (McpApiKey id=${existing.id}, userId=${existing.userId}). Nothing to do.`)
+      const keyLookupHash = await lookupHashForStorage(secret)
+      const keyFingerprint = keyFingerprintOfLookupHash(keyLookupHash)
+      await prisma.user.update({ where: { id: existing.userId }, data: { emailVerified: true, mcpTier: 'ADMIN' } })
+      await prisma.mcpApiKey.update({ where: { id: existing.id }, data: { keyLookupHash, keyFingerprint, tier: 'ADMIN', revokedAt: null } })
+      console.log(`Already migrated (McpApiKey id=${existing.id}, userId=${existing.userId}); refreshed lookup hash and ADMIN tier.`)
       return
     }
 
     // A bare User row with no login identity attached: this "account" is a
     // credential holder only, never a human who signs in, so it doesn't go
     // through the normal signup/verification flow.
-    const systemUser = await prisma.user.create({ data: { emailVerified: true } })
+    const systemUser = await prisma.user.create({ data: { emailVerified: true, mcpTier: 'ADMIN' } })
 
     const keyHash = await hashApiKeyForStorage(secret)
-    const keyPrefix = lookupPrefixOf(secret)
+    const keyLookupHash = await lookupHashForStorage(secret)
+    const keyFingerprint = keyFingerprintOfLookupHash(keyLookupHash)
 
     const key = await prisma.mcpApiKey.create({
-      data: { userId: systemUser.id, keyHash, keyPrefix, name: MIGRATION_KEY_NAME, tier: 'ADMIN' },
+      data: { userId: systemUser.id, keyHash, keyLookupHash, keyFingerprint, name: MIGRATION_KEY_NAME, tier: 'ADMIN' },
     })
 
     console.log(`Migrated MCP_SHARED_SECRET -> McpApiKey id=${key.id}, userId=${systemUser.id}, tier=ADMIN.`)

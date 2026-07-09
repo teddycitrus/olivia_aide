@@ -1,32 +1,35 @@
 import type { ScoredCandidate } from './ResultsCanvas'
 
-function Bar({ label, value }: { label: string; value: number }) {
+const BAR_ACCENTS = ['bg-primary-red', 'bg-primary-blue', 'bg-primary-yellow', 'bg-primary-red'] as const
+
+function Bar({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-24 text-[10px] uppercase tracking-wide text-white/50">{label}</span>
-      <div className="h-1 flex-1 overflow-hidden rounded bg-white/15">
-        <div className="h-full rounded bg-accent" style={{ width: `${Math.round(value * 100)}%` }} />
+      <span className="w-24 text-[10px] font-bold uppercase tracking-wide text-black/60">{label}</span>
+      <div className="h-1.5 flex-1 overflow-hidden border border-black bg-muted">
+        <div className={`h-full ${accent}`} style={{ width: `${Math.round(value * 100)}%` }} />
       </div>
-      <span className="w-8 text-right font-mono text-[10px] text-white/70">{value.toFixed(2)}</span>
+      <span className="w-8 text-right font-mono text-[10px] font-bold text-black/70">{value.toFixed(2)}</span>
     </div>
   )
 }
 
 export function HoverCard({ candidate }: { candidate: ScoredCandidate }) {
   const s = candidate.scoring
+  const pass = s.onBrandOverall >= 0.7
   return (
-    <div className="pointer-events-none w-64 rounded-xl border border-white/15 bg-black/85 p-3 shadow-xl backdrop-blur">
+    <div className="pointer-events-none w-64 border-4 border-black bg-white p-3 shadow-hard">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-widest text-white/50">On-brand</span>
-        <span className={`font-mono text-sm ${s.onBrandOverall >= 0.7 ? 'text-pass' : 'text-fail'}`}>{s.onBrandOverall.toFixed(2)}</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-black/50">On-brand</span>
+        <span className={`font-mono text-sm font-bold ${pass ? 'text-primary-blue' : 'text-primary-red'}`}>{s.onBrandOverall.toFixed(2)}</span>
       </div>
       <div className="space-y-1">
-        <Bar label="Palette" value={s.paletteMatch} />
-        <Bar label="Typography" value={s.typographyMatch} />
-        <Bar label="Photo style" value={s.photoStyleMatch} />
-        <Bar label="Product acc." value={s.productAccuracy} />
+        <Bar label="Palette" value={s.paletteMatch} accent={BAR_ACCENTS[0]} />
+        <Bar label="Typography" value={s.typographyMatch} accent={BAR_ACCENTS[1]} />
+        <Bar label="Photo style" value={s.photoStyleMatch} accent={BAR_ACCENTS[2]} />
+        <Bar label="Product acc." value={s.productAccuracy} accent={BAR_ACCENTS[3]} />
       </div>
-      <p className="mt-2 text-[11px] leading-snug text-white/70">{s.explanation}</p>
+      <p className="mt-2 text-[11px] font-medium leading-snug text-black/70">{s.explanation}</p>
     </div>
   )
 }

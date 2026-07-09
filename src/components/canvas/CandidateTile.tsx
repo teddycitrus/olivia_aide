@@ -33,7 +33,7 @@ export function CandidateTile({
     if (!mesh.current) return
     mesh.current.position.lerp(target, 0.08)
     const m = mesh.current.material as THREE.MeshBasicMaterial
-    const tint = pass ? new THREE.Color('#3ddc84') : new THREE.Color('#ff5470')
+    const tint = pass ? new THREE.Color('#1040C0') : new THREE.Color('#D02020')
     // blend texture toward white then toward tint so the image stays legible
     m.color.lerp(new THREE.Color('#ffffff').lerp(tint, 0.45), 0.1)
     m.opacity = dim ? 0.2 : hovered ? 1 : 0.92

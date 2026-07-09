@@ -17,7 +17,7 @@ The build is done when:
 3. The results view renders as a WebGL mood board — each candidate is a tile in a Three.js scene, colored by pass/fail, draggable, with hover-to-inspect.
 4. Scoring results stream in progressively (SSE) rather than blocking on batch completion.
 5. Exposed as an MCP server (`nora` tool) that Claude Code can invoke locally.
-6. Deploys to Vercel with 3 env vars (Anthropic, Google, OpenAI keys) + DB URL.
+6. Deploys with a static client, a Wasp Node server that can scale to zero, and a managed/serverless Postgres URL.
 7. README pitches the project directly to Cresva and links a live demo.
 
 ## Non-goals
@@ -46,7 +46,7 @@ Pick these exactly. The specific choices are signal, not detail.
 - **WebGL canvas:** `three` + `@react-three/fiber` + `@react-three/drei` for the results mood board.
 - **Streaming:** Server-Sent Events for progressive scoring updates.
 - **MCP server:** `@modelcontextprotocol/sdk` for exposing the scorer as an MCP tool.
-- **Deploy:** Vercel (Wasp deploys to it fine) with Neon-hosted Postgres.
+- **Deploy:** static client hosting plus the generated Wasp Node server on scale-to-zero compute, backed by Neon-hosted Postgres.
 - **Package manager:** pnpm.
 - **Local dev:** Cursor + Claude Code. Commit history should reflect agent-driven development — this is itself a signal.
 

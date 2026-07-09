@@ -1,7 +1,7 @@
 export function ThresholdSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex items-center gap-3">
-      <label className="text-xs uppercase tracking-widest text-white/40">Threshold</label>
+      <label className="text-xs font-bold uppercase tracking-widest text-foreground/50">Threshold</label>
       <input
         type="range"
         min={0}
@@ -9,9 +9,9 @@ export function ThresholdSlider({ value, onChange }: { value: number; onChange: 
         step={0.01}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="flex-1 accent-accent"
+        className="brutal-range flex-1"
       />
-      <span className="w-10 text-right font-mono text-sm text-white/70">{value.toFixed(2)}</span>
+      <span className="w-10 text-right font-mono text-sm font-bold text-foreground/80">{value.toFixed(2)}</span>
     </div>
   )
 }

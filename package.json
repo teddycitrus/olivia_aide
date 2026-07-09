@@ -9,6 +9,7 @@
   "scripts": {
     "verify:scraper": "node --experimental-strip-types scripts/verify-scraper.ts",
     "verify:scoring": "node --experimental-strip-types scripts/verify-scoring.ts",
+    "verify:mcp-auth": "node --experimental-strip-types --env-file=.env.server scripts/verify-mcp-auth.ts",
     "migrate:mcp-secret": "node --experimental-strip-types --env-file=.env.server scripts/migrate-mcp-shared-secret.ts"
   },
   "dependencies": {

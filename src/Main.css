@@ -2,11 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted (not Google Fonts CDN) so it satisfies this app's script/style-src 'self' CSP. */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/Outfit.woff2') format('woff2');
+}
+
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 body {
-  background: #0b0b0f;
-  color: #f4f4f6;
-  font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  background: #F0F0F0;
+  color: #121212;
+  font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+}
+
+input[type='range'].brutal-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 12px;
+  background: #F0F0F0;
+  border: 2px solid #121212;
+}
+input[type='range'].brutal-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 9999px;
+  background: #1040C0;
+  border: 2px solid #121212;
+  cursor: pointer;
+}
+input[type='range'].brutal-range::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 9999px;
+  background: #1040C0;
+  border: 2px solid #121212;
+  cursor: pointer;
 }

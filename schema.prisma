@@ -52,16 +52,19 @@ model Scoring {
 // automatically by Wasp's compiler once `auth` is configured in main.wasp.ts;
 // this model only needs to exist as the thing they attach to.
 model User {
-  id        String      @id @default(cuid())
-  createdAt DateTime    @default(now())
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
   // Mirrors the underlying email-identity's verification flag, set by the
   // onAfterEmailVerified hook (src/auth/hooks.ts). Kept as a plain column
   // here so verifyMcpSecret can check it with a single findUnique on User —
   // MCP requests carry no Wasp session, so there is no `context.user` to read
   // `identities.email.isEmailVerified` off of; this avoids reaching into
   // Wasp's internal Auth/AuthIdentity tables from an unrelated request.
-  emailVerified Boolean  @default(false)
-  apiKeys   McpApiKey[]
+  emailVerified Boolean       @default(false)
+  // Per-account MCP quota tier. New self-service signups start at DEFAULT;
+  // an operator can bump this column for a specific account when needed.
+  mcpTier       McpApiKeyTier @default(DEFAULT)
+  apiKeys       McpApiKey[]
 }
 
 enum McpApiKeyTier {
@@ -70,23 +73,25 @@ enum McpApiKeyTier {
   ADMIN
 }
 
-// Per-caller MCP credential. Only keyHash (argon2id) is ever persisted; the
+// Per-caller MCP credential. Only one-way argon2id hashes are persisted; the
 // plaintext key is returned to the owner exactly once, at creation time, and
-// never stored or logged anywhere. keyPrefix is the first 8 chars of the
-// plaintext key, kept only so the dashboard can show "nora_ab12cd34..." for
-// the user to tell their keys apart — it is not sensitive on its own (32
-// bytes of entropy remain unknown) and is never used for auth.
+// never stored or logged anywhere. keyFingerprint is a short display-only
+// slice of the lookup hash so users can tell keys apart without persisting
+// any plaintext key material.
 model McpApiKey {
-  id         String        @id @default(cuid())
-  userId     String
-  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  keyHash    String        @unique
-  keyPrefix  String
-  name       String?
-  tier       McpApiKeyTier @default(DEFAULT)
-  createdAt  DateTime      @default(now())
-  revokedAt  DateTime?
-  lastUsedAt DateTime?
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyHash        String        @unique
+  // Deterministic argon2id lookup hash of the plaintext key. This is the
+  // DB selector for MCP auth; keyHash above remains the salted verifier.
+  keyLookupHash  String?       @unique
+  keyFingerprint String?
+  name           String?
+  tier           McpApiKeyTier @default(DEFAULT)
+  createdAt      DateTime      @default(now())
+  revokedAt      DateTime?
+  lastUsedAt     DateTime?
 
   @@index([userId])
 }
