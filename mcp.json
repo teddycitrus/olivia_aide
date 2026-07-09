@@ -2,16 +2,16 @@
   "mcpServers": {
     "nora": {
       "type": "http",
-      "url": "https://brandfit.vercel.app/mcp",
+      "url": "https://brand-fit-scorer-olivia-server.fly.dev/mcp",
       "headers": {
-        "X-MCP-Secret": "<set this to that deployment's own MCP_SHARED_SECRET — do not reuse the local one>"
+        "X-MCP-Secret": "<sign up + verify your email at the deployed app's /signup, create a key from /dashboard, and paste it here — never commit the real value>"
       }
     },
     "nora-local": {
       "type": "http",
       "url": "http://localhost:3001/mcp",
       "headers": {
-        "X-MCP-Secret": "<copy the MCP_SHARED_SECRET value from your local .env.server — never commit the real value here>"
+        "X-MCP-Secret": "<sign up at http://localhost:3000/signup (local DB, separate account from prod), create a key from /dashboard, and paste it here>"
       }
     }
   }

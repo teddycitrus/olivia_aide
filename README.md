@@ -191,14 +191,16 @@ Endpoints:
 
 ### Auth
 
-Every request needs an `X-MCP-Secret` header matching the server's `MCP_SHARED_SECRET` env var. Missing or wrong secret returns `401` (constant-time comparison, fails closed if the server has no secret configured, never falls back to open access). Requests are also rate-limited to 100/hour per IP regardless of auth outcome, so a secret-guessing flood trips the limiter same as legitimate traffic.
+Every request needs an `X-MCP-Secret` header matching one of your own per-account API keys — there is no shared/global secret anymore. To get one:
 
-Generate a secret with:
-```sh
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+1. Sign up at `/signup` and verify your email (link is emailed via whatever `emailSender` provider is configured — `Dummy` in local dev, which just logs the link to the server console).
+2. Log in and open `/dashboard`.
+3. Click **+ New key**. The plaintext key is shown exactly once — copy it immediately. Only an argon2id hash is ever stored; if you lose the plaintext, revoke the key and create a new one.
+4. Revoke a key any time from the same dashboard. Revocation is immediate — the next request with that key gets `401`, and no other account's keys are affected.
 
-Use a different secret for local vs. deployed. `mcp.json` has example configs for both; never commit the real value into it.
+Missing, unknown, wrong, or revoked keys all fail closed with the same `401` and the same response timing (a fixed argon2id verify cost plus random jitter is paid on every rejection path, so none of those cases are distinguishable from the outside). Requests are also rate-limited: a coarse 100/hour-per-IP guard applies before auth even runs (so a key-guessing flood trips it regardless of whether any attempt would've succeeded), and every authenticated request additionally counts against your account's own tier quota (`DEFAULT` 100/hour, `PRO` 1000/hour, `ADMIN` 10000/hour) — keyed by account, not IP, so one caller can't be throttled by another's traffic. New signups start at `DEFAULT`; there's no self-service upgrade path, an operator has to bump a `McpApiKey.tier` by hand.
+
+**Migration note:** this replaced a single shared `MCP_SHARED_SECRET` env var used by every caller. Rather than invalidate it and require every existing integration (most importantly Olivia's) to coordinate a cutover, `npm run migrate:mcp-secret` grandfathers the existing secret value into one `ADMIN`-tier `McpApiKey` row (owned by a bare service-account `User`, not a real login) — so it keeps authenticating unchanged. `MCP_SHARED_SECRET` itself is no longer read anywhere; it's safe to remove from env once you've confirmed the migration worked.
 
 ### Supported methods
 
