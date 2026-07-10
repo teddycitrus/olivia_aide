@@ -261,7 +261,7 @@ The planned production shape is serverless-managed data plus scale-to-zero compu
 
 - Postgres runs on a managed/serverless provider such as Neon. Set `DATABASE_URL` to the provider's pooled, TLS-enabled connection string, for example `postgresql://...?...sslmode=require`.
 - The Wasp client is static and can be hosted on any static/CDN host, including Fly, Netlify, Cloudflare Pages, or Vercel.
-- The Wasp server is a generated Node/Express app, not a bundle of per-route serverless functions. In this repo it runs on Fly Machines with `auto_stop_machines = 'stop'`, `auto_start_machines = true`, and `min_machines_running = 0`, so it scales to zero when idle while preserving the normal Wasp deployment path.
+- The Wasp server is a generated Node/Express app, not a bundle of per-route serverless functions. In this repo it runs on Fly Machines with `auto_stop_machines = 'suspend'`, `auto_start_machines = true`, and `min_machines_running = 0`, so it idles down to $0 compute cost and resumes in well under a second on the next request (auth, MCP calls, everything) — no full reboot, no multi-second cold-boot penalty for the first caller after a quiet period.
 - MCP auth, key revocation, spend caps, and rate limits are database-backed and survive cold starts. The scoring concurrency guard is process-local by design, so it limits concurrent work per running server instance rather than globally across every possible instance.
 - A pure function-as-a-service deployment would require refactoring the Wasp server APIs, MCP endpoint, auth sessions, migrations, and SSE streaming path out of the generated Wasp server. That is a deliberate platform migration, not part of the MCP auth change.
 
@@ -280,7 +280,7 @@ The planned production shape is serverless-managed data plus scale-to-zero compu
 - [ ] SSE-streamed progressive scoring in the UI
 - [x] MCP server exposed as a callable tool for external agents
 - [ ] Move production Postgres to Neon or equivalent serverless Postgres
-- [ ] Deploy Wasp server on scale-to-zero compute with static client hosting
+- [x] Deploy Wasp server on scale-to-zero compute with static client hosting
 - [ ] WebGL mood board view for candidate results
 - [ ] Historical ad performance data, as a separate "winner-learning loop" project
 

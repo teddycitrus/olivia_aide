@@ -18,6 +18,7 @@ export const LIMITS = {
   extractBrandPerIp: { limit: 3, windowMs: HOUR_MS },
   scoreCandidatePerIp: { limit: 30, windowMs: HOUR_MS },
   batchScorePerIp: { limit: 3, windowMs: HOUR_MS },
+  discoverImagesPerIp: { limit: 10, windowMs: HOUR_MS },
   batchScoreMaxCandidates: 15,
   // Coarse, pre-auth guard: bounds how many argon2id verify attempts (~120ms
   // of CPU each) any single IP can force regardless of whether the secret

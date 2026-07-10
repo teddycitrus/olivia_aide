@@ -40,6 +40,7 @@ export const brandIdSchema = z.string().trim().min(1).max(64)
 
 export const extractBrandArgsSchema = z.object({ storeUrl: storeUrlSchema })
 export const scoreCandidateArgsSchema = z.object({ brandId: brandIdSchema, imageUrl: imageUrlSchema })
+export const discoverCandidateImagesArgsSchema = z.object({ pageUrl: storeUrlSchema })
 
 export const apiKeyNameSchema = z
   .string()

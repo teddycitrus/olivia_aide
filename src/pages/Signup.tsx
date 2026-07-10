@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { signup, login } from 'wasp/client/auth'
 import { AuthLayout } from '../components/AuthLayout'
+import { useSlowRequestHint } from '../hooks/useSlowRequestHint'
+import { extractAuthErrorMessage } from '../lib/authError'
 import '../Main.css'
 
 const INPUT_CLASS =
@@ -14,6 +16,7 @@ export function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const slow = useSlowRequestHint(loading)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +30,7 @@ export function SignupPage() {
       // already registered (no enumeration at the wire level), so any error
       // reaching here is a real one (weak password, malformed input, etc.) —
       // no special-casing needed.
-      setError(err instanceof Error ? err.message : 'Signup failed. Check your email and password and try again.')
+      setError(extractAuthErrorMessage(err, 'Signup failed. Check your email and password and try again.'))
       setLoading(false)
       return
     }
@@ -94,6 +97,11 @@ export function SignupPage() {
         >
           {loading ? 'Creating account…' : 'Sign up'}
         </button>
+        {slow && (
+          <p className="text-xs font-medium text-foreground/50">
+            Waking up the server — first request after a while can take up to 20s…
+          </p>
+        )}
       </form>
       <p className="mt-4 text-xs font-medium text-foreground/60">
         Already have an account?{' '}

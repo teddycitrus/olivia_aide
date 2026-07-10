@@ -27,6 +27,10 @@ const RULES: Record<string, RouteRule> = {
     endpoint: 'extract-brand',
     perIp: LIMITS.extractBrandPerIp,
   },
+  '/discover-candidate-images': {
+    endpoint: 'discover-candidate-images',
+    perIp: LIMITS.discoverImagesPerIp,
+  },
   '/score-candidate': {
     endpoint: 'score-candidate',
     perIp: LIMITS.scoreCandidatePerIp,

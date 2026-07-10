@@ -127,7 +127,7 @@ export function LandingPage() {
           <h2 className="text-2xl font-black uppercase tracking-tight sm:text-3xl">MCP setup</h2>
           <p className="mt-4 text-sm font-medium leading-relaxed text-foreground/70 sm:text-base">
             Call the scorer directly from any MCP-compatible agent (Claude Code, Olivia, or your own tool runner)
-            without going through this UI. Each caller authenticates with their own API key — there's no shared
+            without going through this UI. Each caller authenticates with their own API key; there's no shared
             secret.
           </p>
 
@@ -143,7 +143,7 @@ export function LandingPage() {
               <a href="/dashboard" className="font-bold text-primary-blue hover:underline">
                 dashboard
               </a>{' '}
-              and create a key — shown once, copy it immediately
+              and create a key (shown once, copy it immediately)
             </li>
             <li>Send it as the header below on every request</li>
           </ol>

@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { requestPasswordReset } from 'wasp/client/auth'
 import { AuthLayout } from '../components/AuthLayout'
+import { useSlowRequestHint } from '../hooks/useSlowRequestHint'
 import '../Main.css'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const slow = useSlowRequestHint(loading)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,6 +60,11 @@ export function ForgotPasswordPage() {
         >
           {loading ? 'Sending…' : 'Send reset link'}
         </button>
+        {slow && (
+          <p className="text-xs font-medium text-foreground/50">
+            Waking up the server — first request after a while can take up to 20s…
+          </p>
+        )}
       </form>
       <p className="mt-4 text-xs font-medium text-foreground/60">
         <Link to="/login" className="font-bold text-primary-blue hover:underline">

@@ -151,7 +151,7 @@ export function DashboardPage() {
           <div className="w-full max-w-lg border-4 border-black bg-white p-6 shadow-hard-lg">
             <h2 className="text-lg font-black uppercase text-primary-red">Copy this key now</h2>
             <p className="mt-2 text-sm font-medium leading-relaxed text-foreground/70">
-              This is the only time it will be shown. It is not stored anywhere you can retrieve it again — if you
+              This is the only time it will be shown. It is not stored anywhere you can retrieve it again. If you
               lose it, revoke it and create a new one.
             </p>
             <div className="mt-4 flex items-center gap-2 border-2 border-black bg-[#121212] p-3">

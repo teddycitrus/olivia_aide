@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { login } from 'wasp/client/auth'
 import { AuthLayout } from '../components/AuthLayout'
+import { useSlowRequestHint } from '../hooks/useSlowRequestHint'
 import '../Main.css'
 
 const INPUT_CLASS =
@@ -18,6 +19,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const slow = useSlowRequestHint(loading)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +67,11 @@ export function LoginPage() {
         >
           {loading ? 'Logging in…' : 'Log in'}
         </button>
+        {slow && (
+          <p className="text-xs font-medium text-foreground/50">
+            Waking up the server — first request after a while can take up to 20s…
+          </p>
+        )}
       </form>
       <div className="mt-4 flex justify-between text-xs font-medium text-foreground/60">
         <Link to="/signup" className="font-bold text-primary-blue hover:underline">

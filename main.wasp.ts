@@ -11,6 +11,7 @@ import { DashboardPage } from "./src/pages/Dashboard" with { type: "ref" }
 
 import { extractBrand } from "./src/actions/extractBrand" with { type: "ref" }
 import { scoreCandidate } from "./src/actions/scoreCandidate" with { type: "ref" }
+import { discoverCandidateImages } from "./src/actions/discoverCandidateImages" with { type: "ref" }
 import { createApiKey } from "./src/actions/apiKeys" with { type: "ref" }
 import { revokeApiKey } from "./src/actions/apiKeys" with { type: "ref" }
 
@@ -82,6 +83,7 @@ export default app({
     // of app-level auth being enabled (auth defaults operations to required).
     action(extractBrand, { entities: ["Brand"], auth: false }),
     action(scoreCandidate, { entities: ["Brand", "Candidate", "Scoring"], auth: false }),
+    action(discoverCandidateImages, { entities: [], auth: false }),
     query(listBrands, { entities: ["Brand"], auth: false }),
     query(getBrand, { entities: ["Brand", "Candidate", "Scoring"], auth: false }),
 

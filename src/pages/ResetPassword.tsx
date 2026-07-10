@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { resetPassword } from 'wasp/client/auth'
 import { AuthLayout } from '../components/AuthLayout'
+import { useSlowRequestHint } from '../hooks/useSlowRequestHint'
+import { extractAuthErrorMessage } from '../lib/authError'
 import '../Main.css'
 
 export function ResetPasswordPage() {
@@ -11,6 +13,7 @@ export function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const slow = useSlowRequestHint(loading)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,7 +23,7 @@ export function ResetPasswordPage() {
       await resetPassword({ token, password })
       setDone(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'That reset link is invalid or has expired.')
+      setError(extractAuthErrorMessage(err, 'That reset link is invalid or has expired.'))
     } finally {
       setLoading(false)
     }
@@ -71,6 +74,11 @@ export function ResetPasswordPage() {
         >
           {loading ? 'Resetting…' : 'Reset password'}
         </button>
+        {slow && (
+          <p className="text-xs font-medium text-foreground/50">
+            Waking up the server — first request after a while can take up to 20s…
+          </p>
+        )}
       </form>
     </AuthLayout>
   )
